@@ -1,0 +1,105 @@
+Requirements                                            <section>
+------------
+*) Should be fast
+*) Adminstrators/Programmers should be able to change the algorithm
+   from user mode
+*) No special system calls should be needed
+*) Kernel mode code should be able to call the user-mode cleaner, when
+   necessary
+
+Design                                                  <section>
+------
+
+Background                                              <sub-section>
+----------
+NetBSD LFS cleanerd currently uses fcntl commands to interact with kernel-side
+data structures. Earlier versions used system calls to talk to the kernel, and
+Perseant has written emulation functions using fcntl commands.
+
+Linux doesn't have fs-specific fcntl functionality, so we will be using
+fs-specific icotls. To keep it as fast as possible, most of the functionality 
+will be in the kernel. The mechanism will be provided by the kernel and the
+policies like which segment to move etc. will be done by the user mode. We
+want to delay adjusting the block pointers as late as possible, so that we can
+stop the cleaner anytime. This is similar to ext2 online resizing.
+
+User-Mode Algo                                          <sub-section>
+---------------------
+The user-mode algorithm is as follows:
+
+func main()
+    if (should_clean()) {
+        read_segusage_table;
+        choose_segments(cost_func); /* cost_func is a cost/benefic func */
+        foreach segment {
+            blocks_array = read_segsum; /* get the list of blocks in seg.*/
+            /* find the real disk blocks for the corresponding blocks */
+            find_dblock(blocks_array, dblocks_array); 
+            gather_segment;         /* copy only the blocks that are active */
+        }
+        write_gathered_segments;
+        update_dblocks;             /* update the pointers */
+        mark_old_segments_dead;
+    }
+}
+
+func cost_func()
+{
+    /* use the netbsd cost_func */
+}
+
+func should_clean()
+{
+    if(not_enough_space)
+        return true;
+    /* more interesting heuristics */
+    ...
+    return false;
+}
+
+User-Kernel Interface                                   <sub-section>
+---------------------
+So, we need the following interfaces
+
+*) find disk blocks for a set of logical blocks (lfs_bmap)
+*) update disk pointers (lfs_mark)
+   sidenote: what happens if the real disk blocks change after we clean?
+   kernel hook has to take care of this. It's going to be ugly, but has
+   to be done
+*) mark segment clean (lfs_segclean)
+
+Kernel code                                             <sub-section>
+-----------
+lfs_bmap()
+{
+    /* we know from the segsum, which inode a block belongs to */
+    lfs_read_block(inode, iblock);  /* we already have this func */
+}
+
+lfs_mark()
+{
+    lock_lfs;   /* we have to do fine-grained locking later */
+    update_inmemory_pointers;
+    update_ondisk_pointers;
+    update_ifile;
+    unlock_lfs;
+}
+
+lfs_segclean()
+{
+    /* easy, set a flag in segum */
+}
+
+Kernel to Usermode Hook                                 <sub-section>
+-----------------------
+We can simply send a SIG_USR1 to cleaner daemon and cleaner can jump to the
+cleaning loop described above. But, this doesn't tell the cleaner why kernel
+asked it to start cleaning. Other complex mechanisms are possible for async
+notification.
+
+Refernces for aysnc notification:
+ - http://www.ussg.iu.edu/hypermail/linux/kernel/9908.3/0350.html
+ - http://www.linuxsymposium.org/proceedings/LinuxSymposium2004_V1.pdf 
+   (Comparing and Evaluating epoll, select, and poll Event Mechanisms)
+ - http://www.linuxsymposium.org/proceedings/LinuxSymposium2004_V2.pdf 
+   (On a Kernel Events Layer and User-space Message Bus System)

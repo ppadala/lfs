@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<title>Compiling and Using LFS</title>
+<meta http-equiv="Content-Type" content= "text/html; charset=iso-8859-1">
+<link rel=stylesheet href="default.css" type="text/css">
+</head>
+
+<body>
+<div id="Content">
+
+<div id="header">
+    <h1>Compiling and Using LFS</h1>
+</div>
+
+<div id="mainContent" class="">
+Currently, LFS cleanly compiles on a <code>2.6.11</code> kernel.
+<h2>Compiling LFS</h2>
+<ul>
+    <li>Get the LFS source.
+    <pre>
+    cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/logfs login
+    cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/logfs co -r stable -P lfs 
+    </pre>
+    <li>Change the <code>KDIR</code> to point to kernel headers dir, 
+    if you want to compile for a specific kernel.
+    <li>Enable debugging by uncommenting the <code>#define DEBUG</code> in
+    <code>include/lfs_kernel.h</code>. However, this produces a lot of
+    debugging output in <code>syslog</code>, and considerably slows your
+    system.
+    <li>Run top level <code>make</code>
+    <li>If you want to compile the documentation, run <code>make</code> in the
+    doc directory. <code>latex</code> needs to be installed for it to compile.
+</ul>
+
+<h2>Using LFS</h2>
+<ul>
+    <li>Insert the kernel module
+    <pre>
+    /sbin/insmod lfs.ko
+    </pre>
+    <li>Format a partition to be LFS
+    <pre>
+    lfsprogs/mklfs /dev/foo
+    </pre>
+    <li>Mount it
+    <pre>
+    mount -t lfs /dev/foo /mnt/foo
+    </pre>
+    <li>Check the file <code>doc/cases</code>  for working scenarios, and
+    start with testing them
+    <li>If you have gotten this far, you know what to do next :-) Just play
+    with LFS, and let me know if you find any thing wierd.
+</ul>
+</div>
+
+</div>
+</body>
+</html>

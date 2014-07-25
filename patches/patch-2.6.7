@@ -1,0 +1,19 @@
+--- linux-2.6.7/mm/truncate.c	2004-06-16 01:20:04.000000000 -0400
++++ /home/ppadala/truncate.c	2005-07-26 19:26:21.000000000 -0400
+@@ -65,7 +65,7 @@ truncate_complete_page(struct address_sp
+  * ->tree_lock.  That provides exclusion against the __set_page_dirty
+  * functions.
+  */
+-static int
++int
+ invalidate_complete_page(struct address_space *mapping, struct page *page)
+ {
+ 	if (page->mapping != mapping)
+@@ -85,6 +85,7 @@ invalidate_complete_page(struct address_
+ 	page_cache_release(page);	/* pagecache ref */
+ 	return 1;
+ }
++EXPORT_SYMBOL(invalidate_complete_page);
+ 
+ /**
+  * truncate_inode_pages - truncate *all* the pages from an offset

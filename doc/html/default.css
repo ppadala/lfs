@@ -1,0 +1,110 @@
+body {
+    width: 75%;
+    float: center;
+    color: #000;
+    margin: 20px auto;
+    
+}
+
+.noborder {
+    border: none;
+}
+
+.remark {
+    border:solid; 
+    border-width:1px; 
+    padding:10px; 
+    background:#ffcccc;
+    margin: 0 0 5px 0;
+}
+
+.center {
+    text-align: center;
+}
+
+.faq {
+    padding-left: 20px;
+}
+
+#Content {
+    /*background: #fff8dc;*/
+    /*background: #f5f5dc;*/
+    background: #FFEBCD;
+    /*border: 1px solid #333;*/
+    font-family: verdana, sans-serif;
+    font-size: small;
+}
+
+#mainContent {
+    padding: 25px;
+}
+
+#mainContent h2 {
+    font-family: arial;
+    font-size: large;
+    font-weight: normal;
+    /*background-color: #D2B48C; /*cfdced;*/
+    color: #444;
+    padding: 2px;
+    margin-top: 10px;
+    clear: right;
+}
+
+#mainContent h3 {
+    color: #444;
+}
+
+#mainContent pre {
+    font-family: courier;
+    font-size: small;
+}
+
+#mainContent code {
+    font-family: courier;
+    font-size: small;
+}
+
+#header {
+    background: #ffcc99;
+    position: relative;
+    color: #000;
+    margin-bottom: 10px;
+    padding: 1px 0;
+}
+#header h1 {
+    font-family: arial;
+    font-size: x-large;
+    font-weight: normal;
+}
+
+#footer {
+    clear: both;
+    margin: 2em 0;
+    padding: 1em 0;
+    border-top: 1px solid #999;
+    text-align: center;
+}
+
+#footer ul {
+    margin: 0 0 1em 0;
+    padding: 0;
+}
+                            
+#footer li {
+    display: inline;
+    padding: 0 20px 0 0;
+    margin: 0;
+    white-space:
+    nowrap;
+}
+
+#footer p,#footer p a {
+    color: #666;
+}
+                    
+#footer p a:hover {
+    color: #000;
+}
+#header, #footer {
+    text-align: center;
+}

@@ -1,0 +1,11 @@
+DOC_FILES = html/index.html html/compiling.html html/default.css latex/lfs.pdf
+PATCH_FILES = ../patches/patch-2.6.7 ../patches/vmware.config
+SFSERVER = shell.sf.net
+HTDOCS = logfs/htdocs
+all:
+	cd latex; make
+	scp  ${DOC_FILES} ${SFSERVER}:${HTDOCS}
+	scp  ${PATCH_FILES} ${SFSERVER}:${HTDOCS}/patches
+
+clean:
+	cd latex;make clean

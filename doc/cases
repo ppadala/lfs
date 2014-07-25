@@ -1,0 +1,92 @@
+----------------------
+Useful debugging tools
+----------------------
+lfsprogs/test
+lfsprogs/lfsread
+
+Check the options for details on using them
+
+-----------------
+Working scenarios 
+-----------------
+Before each scenario, please do
+umount /mnt/foo	# if you have already mounted
+lfsprogs/mklfs /dev/hda11
+mount -t lfs /dev/hda11 /mnt/foo
+
+------
+Basics
+------
+lfsprogs/mklfs /dev/hda11
+mount -t lfs /dev/hda11 /mnt/foo
+umount /mnt/foo
+
+-----------
+link/unlink
+-----------
+touch /mnt/foo/x
+ls -al /mnt/foo
+ln /mnt/foo/x /mnt/foo/y
+ls -al /mnt/foo
+rm /mnt/foo/x
+rm /mnt/foo/y
+
+-----------
+mkdir/rmdir
+-----------
+mkdir /mnt/foo/a
+mkdir /mnt/foo/b
+touch /mnt/foo/file
+rmdir /mnt/foo/a	# should fail with an error
+rmdir /mnt/foo/b	# should faile with an error
+rm /mnt/foo/file
+rmdir /mnt/foo/b
+rmdir /mnt/foo/a
+
+----------
+Read/Write
+----------
+touch /mnt/foo/x
+../lfsprogs/test 1 <nblocks> /mnt/foo/x
+../lfsprogs/test 0 <nblocks> /mnt/foo/x > out
+cat out		# should contain nblocks * 1024 'a's
+
+--------------------------
+Creation of files in a dir
+--------------------------
+../lfsprogs/test 3 /mnt/foo <nfiles>
+umount /mnt/foo
+mount -t lfs /dev/hda11 /mnt/foo
+ls -al /mnt/foo	# should contain nfiles
+
+-------------
+Seek and Read
+-------------
+cp file.c /mnt/foo
+../lfsprogs/test 4 /mnt/foo/file.c <offset> # should print 100 characters
+					    # starting from offset
+--------------
+Seek and Write
+--------------
+cp file.c /mnt/foo
+../lfsprogs/test 5 /mnt/foo/file.c <offset> # 100 'a's should appear at offset
+					    # and the rest of the file should
+					    # be intact
+
+------------------------------------
+Normal applications doing buffer I/O
+------------------------------------
+vi|emacs /mnt/foo/file.c
+<do whatever you do normally with a file, write and quit>
+cat /mnt/foo/file.c	# should see what you have typed
+
+---------
+tar/untar
+---------
+tar zcvf x.tar.gz /bin/bash /bin/tcsh /bin/ash	# this should create
+						# tar file of size approx 800KB
+						# don't go over 1MB limit. It
+						# may or may not work
+cp x.tar.gz /mnt/foo
+cd /mnt/foo
+tar zxvf /mnt/foo	# should see bash, tcsh and ash

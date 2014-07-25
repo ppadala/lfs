@@ -1,0 +1,33 @@
+\begin{thebibliography}{1}
+
+\bibitem{Rosenblum91}
+Mendel Rosenblum and John~K. Ousterhout.
+\newblock The design and implementation of a log-structured file system.
+\newblock In {\em Proceedings of 13th ACM Symposium on Operating Systems
+  Principles}, pages 1--15. Association for Computing Machinery SIGOPS, October
+  1991.
+
+\bibitem{log_vs_cluster}
+Margo Seltzer, Keith~A. Smith, Hari Balakrishnan, Jacqueline Chang, Sara
+  McMains, and Padmanabhan Padmanabhan.
+\newblock File system logging versus clustering: {A} performance comparison.
+\newblock In {\em Usenix Annual Technical Conference}, 1995.
+
+\bibitem{wafl}
+Dave Hitz, James Lau, and Michael Malcolm.
+\newblock File system design for an {NFS} file server appliance.
+\newblock In {\em Usenix Conference}, Winter 1994.
+
+\bibitem{fs_bench}
+Justin Piszcz.
+\newblock Benchmarking filesystems.
+\newblock {\em Linux Gazette}, (102), May 2004.
+
+\bibitem{googlefs}
+Sanjay Ghemawat, Howard Gobioff, and Leung Leung.
+\newblock The google file system.
+\newblock In {\em Proceedings of the nineteenth {ACM} symposium on Operating
+  systems principles}, volume 37, 5 of {\em Operating Systems Review}, pages
+  29--43, New York, October ~19--22 2003. ACM Press.
+
+\end{thebibliography}

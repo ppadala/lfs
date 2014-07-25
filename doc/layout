@@ -1,0 +1,53 @@
+General structure of LFS on disk
+ _____________________________________________
+| summary | data/inode | summary | data/inode |
+|  block  |   blocks   |  block  |   blocks   | ...
+`_________|____________|_________|____________|
+<---------segment----->|<---------segment----->
+
+When make_lfs runs for the first time, this is how disk looks
+ ______________ ______ ______ _________________________________
+| Super |      |      |      |                                  |
+| block |      |      |      |     first segment (see below)    |
+`_______|______|______|______|__________________________________|
+    0      1      2      3      4
+
+ SEGSTART
+ _________________________________________________________________
+| summary | ifile | ifile | root  | root  |seguse |seguse |       |
+|         | dblock| inode | dblock| inode |dblock |inode  |       |
+`_________|_______|_______|_______|_______|_______|_______|_______|
+    4        5       6       7       8       9       10       11 
+
+Summary block (detail)
+         ______________
+        | FINFO count  |
+        | inode count  |
+        |______________|
+        |   inob[0]    |
+        |     .        | 0 or more inode daddr_t's, identifying the inode
+        |     .        | blocks in the segment.
+        |     .        | 
+        |   inob[N]    | 
+        |   FINFO[0]   | 
+        |              | 
+        |              | 0 or more file info structures, identifying the
+        |     .        | blocks in the segment.
+        |     .        |
+        |     .        |
+        |   FINFO[N]   |
+        `______________|
+
+
+Ifile dblocks
+
+        Ifile (detail)
+         ______________
+        |   ife[0]     | Per inode status information: current version #,
+        |     .        | if currently allocated, last access time and
+        |     .        | current disk address of containing inode block.
+        |     .        | If current disk address is LFS_UNUSED_DADDR, the
+        |   ife[1]     | inode is not in use, and it's on the free list.
+        `______________|
+
+LFS inode structure is similar to ext2_inode

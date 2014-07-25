@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<title>LFS: A Log Structured File System for Linux that Supports Snapshots</title>
+<meta http-equiv="Content-Type" content= "text/html; charset=iso-8859-1">
+<link rel=stylesheet href="default.css" type="text/css">
+</head>
+
+<body>
+<div id="Content">
+
+<div id="header">
+    <table><tr><td>
+    <img src="images/google-soc.png" /> <br/>
+    <font size="-2">soc logo by <a href="http://webchick.net/">Angela Byron</a>
+    <td> <h1>LFS: A Log Structured File System for Linux that Supports Snapshots</h1>
+    </table>
+</div>
+
+<div id="mainContent" class="">
+
+This is a project developed as a part of the <a
+href="http://code.google.com/summerofcode.html">Google Summer of Code</a>
+program.
+
+<h2>Introduction</h2>
+A <a href="http://citeseer.ist.psu.edu/rosenblum91design.html">Log Structured File System (LFS)</a> writes all the file
+system data sequentially in a <i>log-like</i> structure. A log consists of a
+series of <i>segments</i>, where each segment contains both data and inode
+blocks. Traditional file systems like <a
+href="http://e2fsprogs.sourceforge.net/ext2intro.html">ext2</a> usually write inode
+blocks at a fixed place on the disk, causing overhead due to disk seeks. A log
+structured file system gathers a segment worth of data in memory and appends
+the segment at the end of the log.  This dramatically improves the write
+performance while maintaining the same read performance. The sequential
+nature of the log also helps in crash recovery as less checkpointing
+information need to be stored.  As the file system grows and files are
+deleted, holes are created in the file system. A <i>cleaner</i> is required
+to fill the holes and compact the file system allowing large extents of free
+blocks to be found. The novel aspect in this work is the addition of
+snapshotting capability to log-structured file systems. Currently, no Linux
+file system offers this capability.
+<p>
+The primary objective of this work is to <b>create a log-structured file system
+for Linux that supports snapshots</b>. A snapshot is a copy of the files taken at
+a particular time. This is very similar to backup of a file system at a
+particular time except that it is maintained within the same file system
+without wasting any space. We believe that LFS is the ideal system for maintaining
+snapshots, because its design renders naturally to maintain snapshots.
+
+<h2>Motivation</h2>
+<i>Why do we need yet another file system for Linux?</i> When LFS was
+originally proposed, the idea of <i>append-to-end-of-log</i> to improve
+write performance was novel and produced great results on various micro
+benchmarks. However, <a href="http://citeseer.ist.psu.edu/seltzer95file.html">later studies</a> have shown that in
+transaction processing environments LFS performs poorly due to the cleaner
+overhead.  We believe that advances in disk and memory technologies will help
+log structured file systems. In the past decade, huge improvements are seen in
+the disk and memory sizes for a typical machine. Increase in memory size
+allows LFS to gather more segments in memory and with larger disk space, the
+cleaner need not be run as often.
+<p>
+Currently, no Linux file system supports snapshots. Snapshots are usually
+considered a special capability supported by network attached storage devices
+(NASD) developed by companies like NetApp. The cost of these NASDs is
+prohibitive for small businesses and we believe that we can develop an open
+source file system that supports snapshots. Since LFS lends itself naturally
+to support snapshots, we propose to implement an LFS for Linux.
+
+<h2>Status</h2>
+
+LFS is currently under furious development. A release will be made very soon.
+Current stable version can be obtained from CVS, and instructions on compiling
+and using LFS are available <a href="compiling.html">here</a>. 
+
+<p>
+In the current state, one can perform various normal file system operations
+like <code>mkdir, rmdir, link, unlink ...</code>. A working cleaner is also
+available, and basic snapshotting framework is in the bleeding edge version.
+The code compiles cleanly on <code>2.6.11</code> kernel and may or
+may not compile on other 2.6 kernels.  Contact <a
+href="mailto:ppadala@users.sourceforge.net">me</a>, if you are interested in
+testing it.
+
+<p>
+I maintain notes about LFS development on my <a
+href="http://ppadala.blogspot.com">blog</a>
+<p>
+<b>Disclaimer</b>: The file system is still experimental and may eat up your
+disk/memory and/or lock up your machine. I am not responsible for any damage
+you might incur. That said, it probably would only cause damage to the LFS
+partition.
+
+<h2>Mailing List</h2>
+<a
+href="http://lists.sourceforge.net/lists/listinfo/logfs-devel">Subscribe</a>
+to the <a
+href="http://lists.sourceforge.net/lists/listinfo/logfs-devel">mailing
+list</a>, if you are interested in following LFS development. This is also the
+right place for feature requests, bug reports etc.
+
+<h2>People</h2>
+<ul>
+<li> <a href="http://www.eecs.umich.edu/~ppadala">Pradeep Padala</a> 
+<li><a href="http://www.monkey.org/~marius/pages/">Marius Eriksen</a> - Mentor
+</ul>
+
+<h2>Documents</h2>
+<ul>
+<li><a href="lfs.pdf">Original SoC Proposal</a>
+</ul>
+
+<h2>FAQ</h2>
+<div class="faq">
+<h3>Have you checked other implemenations? Why are you reinventing the wheel?</h3>
+Yes. The project takes its inspiration and data structures from the <a
+href="http://www.hhhh.org/perseant/lfs.html">NetBSD LFS</a>
+implementation. There have been various attempts to implement a logfs for
+Linux.
+<ul>
+
+<li><a href="http://www.complang.tuwien.ac.at/czezatke/lfs.html">LinLogFS</a>:
+Originally developed for <code>2.2.x</code> kernels as a
+modification to <code>ext2</code>'s lower layers. A lot has changed
+since <code>2.2</code> (for example merging of buffer and page caches) and a
+new file system that directly manipulates the buffer cache is required. The
+original author lists <a
+href="http://www.complang.tuwien.ac.at/anton/lfs/lfs-ideas.html">various cool
+additions</a> to LFS including snapshots and mentioned
+
+<pre>
+It's probably best to implement them from scratch (or starting with ext2 or so)
+rather than trying to port LinLogFS forward to Linux 2.6 and then add these
+ideas.
+</pre>
+
+The project originally did not include a cleaner (see below).
+<li><a href="http://www.gatwood.net/projects/linlog.html">LinLogFS
+Cleaner</a>: This is developed as a part of Master's thesis project by <a
+href="http://www.gatwood.net">David Gatwood</a>. The cleaner is pretty limited and I wanted a modularized 
+cleaner to implement new cleaning algorithms. Also, the code is not available
+online, and my e-mails to David are unanswered.
+<li><a href="http://www.cs.arizona.edu/swarm/">The Swarm Scalable Storage
+System</a>: This project uses logfs concepts to implement a storage solution
+for the cluster. A lot of interesting ideas are discussed in their <a
+href="http://www.cs.arizona.edu/swarm/papers/freenix00.pdf">paper</a>, but
+where is the code?
+<li><a href="http://cgi.cse.unsw.edu.au/~neilb/">Neil Brown</a> submitted a <a
+href="http://cgi.cse.unsw.edu.au/~neilb/conf/lca2003/">paper</a> to <a
+href="http://www.linux.org.au/conf/2003/">LCA 2003</a> discussing various
+aspects of developing a log structured file system. No code has been released
+yet. I contacted him in 2004 and he mentioned that he is working on a
+user-space prototype.
+</ul>
+
+No current Linux file system supports snapshots and implementing a file system
+that inherently supports a file system will be a great addition to Linux.
+
+<h3>What are these snapshots and Why do I need them?</h3>
+Some people call them versions, but I would like to call them snapshots as
+they represent snapshots of a whole file system rather than a single file.
+Netapp's <a href="http://www.netapp.com/tech_library/3002.html">WAFL file
+system</a> provides snapshots of file system over time. For example, if you
+have accidentally deleted your home directory, you can just go to
+<code>.snapshot</code> directory and you can see snapshots of the directory
+from various points of time.
+
+This is an invaluable feature as it provides backups within the file system
+without wasting unnecessary space.
+</div>
+</div>
+<div id="footer">
+        <p class="copyright">Copyright &copy; 2005 
+        <a href="mailto:ppadala@users.sourceforge.net">Pradeep Padala</a></p>
+        <p> <span>
+        Last updated on
+
+        <script type="text/javascript">
+        <!-- hide from old browser//
+        document.write(document.lastModified);
+        //-->
+        </script>
+        </span>
+        <noscript>
+        <p>JavaScript is not enabled</p>
+        </noscript>
+
+        <br><br>
+    <p> <a href="http://validator.w3.org/check?uri=referer">
+    <img class="noborder" src="http://www.w3.org/Icons/valid-html401"
+         alt="Valid HTML 4.01!" height="31" width="88">
+    </a>
+    <a href="http://jigsaw.w3.org/css-validator/check/referer">
+    <img class="noborder" style="border:0;width:88px;height:31px"
+         src="http://jigsaw.w3.org/css-validator/images/vcss" 
+         alt="Valid CSS!">
+    </a> </p>
+</div>
+</div>
+</body>
+</html>
